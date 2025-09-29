@@ -1,33 +1,29 @@
 # app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine, Base
-import app.models  # ★テーブル作成前にモデルを読み込む
-from app.routes.users import router as users_router
-from app.routes.todos import router as todos_router
 
-app = FastAPI(title="Todo Backend", version="0.1.0")
+# ← 相対インポートにするのがポイント！
+from .routes import auth, todos
+from .database import Base, engine
 
-# --- CORS (フロントから叩けるように) ---
+app = FastAPI()
+
+# DBテーブル作成
+Base.metadata.create_all(bind=engine)
+
+# CORS
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-    ],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- ヘルスチェック用(トップページ) ---
-@app.get("/")
-def root():
-    return {"status": "ok"}
-
-# --- モデルを元にDBテーブル作成 ---
-Base.metadata.create_all(bind=engine)
-
-# --- ルーター登録 ---
-app.include_router(users_router)
-app.include_router(todos_router)
+# ルーター登録
+app.include_router(auth.router)
+app.include_router(todos.router)

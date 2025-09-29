@@ -19,6 +19,8 @@ class UserRead(UserBase):
     # Pydantic v2: ORMからの変換を有効にする
     model_config = ConfigDict(from_attributes=True)
 
+class Message(BaseModel):
+    message: str
 
 # ===== Todo =====
 class TodoBase(BaseModel):
@@ -48,3 +50,12 @@ class TodoRead(TodoBase):
 # ===== 便利な入れ子スキーマ（必要になったら使う用） =====
 class UserWithTodos(UserRead):
     todos: List[TodoRead] = []
+
+# ===== Auth（認証用） =====
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"

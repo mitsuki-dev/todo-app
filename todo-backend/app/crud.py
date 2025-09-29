@@ -2,19 +2,23 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app import models, schemas
-from app.auth_utils import hash_password
+from app.security import get_password_hash
+
+def get_user_by_username(db: Session, username: str):
+    return db.query(models.User).filter(models.User.username == username).first()
 
 # ===== Users =====
-def create_user(db: Session, user_in: schemas.UserCreate) -> models.User:
-    user = models.User(
-        username=user_in.username,
-        email=user_in.email,
-        hashed_password=hash_password(user_in.password),
+def create_user(db: Session, user: schemas.UserCreate) -> models.User:
+    hashed_pw = get_password_hash(user.password)
+    db_user = models.User(
+        username=user.username,
+        email=user.email,
+        hashed_password=hashed_pw
     )
-    db.add(user)
+    db.add(db_user)
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(db_user)
+    return db_user
 
 def get_user(db: Session, user_id: int) -> Optional[models.User]:
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -62,3 +66,19 @@ def delete_todo(db: Session, todo_id: int) -> bool:
     db.delete(todo)
     db.commit()
     return True
+
+def toggle_todo(db: Session, todo_id: int, user_id: int) -> Optional[models.Todo]:
+    # 自分のタスクだけを対象にする
+    todo = db.query(models.Todo).filter(
+        models.Todo.id == todo_id,
+        models.Todo.user_id == user_id
+    ).first()
+
+    if not todo:
+        return None
+
+    # 完了フラグを反転
+    todo.completed = not todo.completed
+    db.commit()
+    db.refresh(todo)
+    return todo
