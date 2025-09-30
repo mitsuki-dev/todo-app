@@ -1,23 +1,15 @@
-import React, { useEffect, useState } from "react";
+// src/App.js
+import React from "react";
+import Header from "./components/Header";
+import ToDoForm from "./components/ToDoForm";
+import ToDoList from "./components/ToDoList";
 
 function App() {
-  const [todos, setTodos] = useState([]);
-
-  useEffect(() => {
-    fetch("http://localhost:8000/api/todo")
-      .then((res) => res.json())
-      .then(setTodos)
-      .catch(console.error);
-  }, []);
-
   return (
-    <div style={{ padding: 24 }}>
-      <h1>Todo List</h1>
-      <ul>
-        {todos.map((t) => (
-          <li key={t.id}>{t.title}</li>
-        ))}
-      </ul>
+    <div>
+      <Header />
+      <ToDoForm />
+      <ToDoList />
     </div>
   );
 }
