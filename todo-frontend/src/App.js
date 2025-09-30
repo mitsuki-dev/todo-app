@@ -1,15 +1,22 @@
 // src/App.js
 import React from "react";
 import Header from "./components/Header";
-import ToDoForm from "./components/ToDoForm";
-import ToDoList from "./components/ToDoList";
+import SignUpForm from "./components/SignUpForm";
 
 function App() {
+  const appStyle = {
+    maxWidth: "600px",
+    margin: "0 auto",
+    padding: "20px",
+    boxSizing: "border-box",
+  };
+
   return (
-    <div>
+    <div style={appStyle}>
+      {/* ヘッダー */}
       <Header />
-      <ToDoForm />
-      <ToDoList />
+      {/* サインアップフォーム */}
+      <SignUpForm />
     </div>
   );
 }
