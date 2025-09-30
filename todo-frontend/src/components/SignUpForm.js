@@ -1,31 +1,24 @@
 // src/components/SignUpForm.js
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function SignUpForm() {
-  // フォームの入力値
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
   });
-
-  // 入力エラーを保持
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
-  // 各入力の変化を反映（共通ハンドラ）
   const handleInputChange = (e) => {
-    const { name, value } = e.target; // どのフィールドかと値
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value, // フィールド名に対応する値を更新
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 送信時の処理
   const handleSubmit = (e) => {
-    e.preventDefault(); // ページリロード防止
+    e.preventDefault();
 
-    // 簡易バリデーション
     const newErrors = {};
     if (!formData.username)
       newErrors.username = "ユーザー名を入力してください。";
@@ -35,49 +28,49 @@ function SignUpForm() {
 
     setErrors(newErrors);
 
-    // エラーが無ければ（仮）成功
     if (Object.keys(newErrors).length === 0) {
       alert("アカウント作成が完了しました！（仮）");
+      navigate("/login");
     }
   };
 
-  // シンプルなインラインスタイル
   const formStyle = {
     display: "flex",
     flexDirection: "column",
-    gap: "15px",
+    gap: 15,
     margin: "0 auto",
-    maxWidth: "420px",
+    maxWidth: 400,
   };
-
   const inputStyle = {
-    padding: "10px",
-    fontSize: "16px",
+    padding: 10,
+    fontSize: 16,
     width: "100%",
     boxSizing: "border-box",
   };
-
-  const errorStyle = {
-    color: "red",
-    fontSize: "12px",
-    marginTop: "4px",
-  };
-
+  const errorStyle = { color: "red", fontSize: 12 };
   const buttonStyle = {
-    padding: "10px",
-    fontSize: "16px",
+    padding: 10,
+    fontSize: 16,
     backgroundColor: "#007bff",
     color: "#fff",
     border: "none",
     cursor: "pointer",
   };
+  const linkButtonStyle = {
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: "transparent",
+    color: "#007bff",
+    border: "none",
+    textDecoration: "underline",
+    cursor: "pointer",
+    textAlign: "center",
+  };
 
   return (
     <form style={formStyle} onSubmit={handleSubmit}>
-      {/* 見出し（任意） */}
       <h2 style={{ textAlign: "center" }}>ToDoアプリ</h2>
 
-      {/* ユーザー名 */}
       <div>
         <input
           type="text"
@@ -90,7 +83,6 @@ function SignUpForm() {
         {errors.username && <p style={errorStyle}>{errors.username}</p>}
       </div>
 
-      {/* メールアドレス */}
       <div>
         <input
           type="email"
@@ -103,7 +95,6 @@ function SignUpForm() {
         {errors.email && <p style={errorStyle}>{errors.email}</p>}
       </div>
 
-      {/* パスワード */}
       <div>
         <input
           type="password"
@@ -116,9 +107,16 @@ function SignUpForm() {
         {errors.password && <p style={errorStyle}>{errors.password}</p>}
       </div>
 
-      {/* 送信ボタン */}
       <button type="submit" style={buttonStyle}>
         アカウント作成
+      </button>
+
+      <button
+        type="button"
+        style={linkButtonStyle}
+        onClick={() => navigate("/login")}
+      >
+        ログイン画面に戻る
       </button>
     </form>
   );
