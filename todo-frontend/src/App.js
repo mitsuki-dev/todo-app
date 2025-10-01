@@ -10,7 +10,7 @@ import {
 import Header from "./components/Header.js";
 import LoginForm from "./components/LoginForm";
 import SignUpForm from "./components/SignUpForm";
-import TodoHome from "./components/TodoHome";
+import ToDoHome from "./components/ToDoHome";
 
 function App() {
   // ログイン状態と表示名
@@ -52,7 +52,7 @@ function App() {
             path="/home"
             element={
               isLoggedIn ? (
-                <TodoHome onLogout={handleLogout} username={username} />
+                <ToDoHome onLogout={handleLogout} username={username} />
               ) : (
                 <Navigate to="/login" replace />
               )
