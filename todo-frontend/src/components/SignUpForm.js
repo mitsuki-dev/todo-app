@@ -3,19 +3,24 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function SignUpForm() {
+  // フォームの状態
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
   });
+
+  // バリデーションエラー
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
+  // 入力変更
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // 送信
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -28,37 +33,39 @@ function SignUpForm() {
 
     setErrors(newErrors);
 
+    // エラーなし → 仮登録完了 → /login へ
     if (Object.keys(newErrors).length === 0) {
       alert("アカウント作成が完了しました！（仮）");
       navigate("/login");
     }
   };
 
+  // スタイル（簡易）
   const formStyle = {
     display: "flex",
     flexDirection: "column",
-    gap: 15,
+    gap: "15px",
     margin: "0 auto",
-    maxWidth: 400,
+    maxWidth: "400px",
   };
   const inputStyle = {
-    padding: 10,
-    fontSize: 16,
+    padding: "10px",
+    fontSize: "16px",
     width: "100%",
     boxSizing: "border-box",
   };
-  const errorStyle = { color: "red", fontSize: 12 };
+  const errorStyle = { color: "red", fontSize: "12px" };
   const buttonStyle = {
-    padding: 10,
-    fontSize: 16,
+    padding: "10px",
+    fontSize: "16px",
     backgroundColor: "#007bff",
     color: "#fff",
     border: "none",
     cursor: "pointer",
   };
   const linkButtonStyle = {
-    padding: 10,
-    fontSize: 16,
+    padding: "10px",
+    fontSize: "16px",
     backgroundColor: "transparent",
     color: "#007bff",
     border: "none",
@@ -69,8 +76,7 @@ function SignUpForm() {
 
   return (
     <form style={formStyle} onSubmit={handleSubmit}>
-      <h2 style={{ textAlign: "center" }}>ToDoアプリ</h2>
-
+      {/* ユーザー名 */}
       <div>
         <input
           type="text"
@@ -83,6 +89,7 @@ function SignUpForm() {
         {errors.username && <p style={errorStyle}>{errors.username}</p>}
       </div>
 
+      {/* メール */}
       <div>
         <input
           type="email"
@@ -95,6 +102,7 @@ function SignUpForm() {
         {errors.email && <p style={errorStyle}>{errors.email}</p>}
       </div>
 
+      {/* パスワード */}
       <div>
         <input
           type="password"
@@ -111,6 +119,7 @@ function SignUpForm() {
         アカウント作成
       </button>
 
+      {/* ログインに戻るリンク風ボタン */}
       <button
         type="button"
         style={linkButtonStyle}

@@ -3,55 +3,60 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function LoginForm({ onLogin }) {
-  // 入力用 state
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  // エラー
-  const [error, setError] = useState("");
-
-  const navigate = useNavigate(); // 画面遷移用
+  const [username, setUsername] = useState(""); // ユーザー名
+  const [password, setPassword] = useState(""); // パスワード
+  const [error, setError] = useState(""); // エラーメッセージ
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // 仮ユーザー（後でAPI連携に差し替え）
-    const mockUser = { username: "testuser", password: "password123" };
+    // 仮の認証データ（カリキュラム指定）
+    const mockUser = {
+      username: "testuser",
+      password: "password123",
+    };
 
+    // 入力チェック
     if (username === mockUser.username && password === mockUser.password) {
-      onLogin?.(username); // App.jsのログイン処理を呼ぶ
-      navigate("/home"); // ホームへ遷移
+      setError("");
+      onLogin(username); // ← App.js にログイン成功を通知
+      navigate("/home"); // ← ホームへ遷移
     } else {
       setError("ユーザー名またはパスワードが正しくありません。");
     }
   };
 
-  const goToSignUp = () => navigate("/signup");
+  const handleNavigateToSignUp = () => {
+    navigate("/signup");
+  };
 
-  // --- 簡易スタイル ---
+  // ---- 簡易スタイル（そのままコピペでOK）----
   const formStyle = {
     display: "flex",
     flexDirection: "column",
-    gap: 15,
-    maxWidth: 400,
+    gap: "15px",
+    maxWidth: "400px",
     margin: "20px auto",
   };
   const inputStyle = {
-    padding: 10,
-    fontSize: 16,
+    padding: "10px",
+    fontSize: "16px",
     width: "100%",
     boxSizing: "border-box",
   };
   const buttonStyle = {
-    padding: 10,
-    fontSize: 16,
+    padding: "10px",
+    fontSize: "16px",
     backgroundColor: "#007bff",
     color: "#fff",
     border: "none",
     cursor: "pointer",
+    textAlign: "center",
   };
   const linkButtonStyle = {
-    padding: 10,
-    fontSize: 16,
+    padding: "10px",
+    fontSize: "16px",
     backgroundColor: "transparent",
     color: "#007bff",
     border: "none",
@@ -59,12 +64,10 @@ function LoginForm({ onLogin }) {
     cursor: "pointer",
     textAlign: "center",
   };
-  const errorStyle = { color: "red", fontSize: 12 };
+  const errorStyle = { color: "red", fontSize: "12px" };
 
   return (
     <form style={formStyle} onSubmit={handleSubmit}>
-      <h2 style={{ textAlign: "center" }}>ToDoアプリ</h2>
-
       <input
         type="text"
         placeholder="ユーザー名"
@@ -85,7 +88,11 @@ function LoginForm({ onLogin }) {
       <button type="submit" style={buttonStyle}>
         ログイン
       </button>
-      <button type="button" style={linkButtonStyle} onClick={goToSignUp}>
+      <button
+        type="button"
+        style={linkButtonStyle}
+        onClick={handleNavigateToSignUp}
+      >
         アカウント作成はこちら
       </button>
     </form>
