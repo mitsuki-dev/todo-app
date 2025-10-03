@@ -1,5 +1,6 @@
-// src/components/ToDoHome.js
-import React, { useState } from "react";
+// src/components/TodoHome.js
+import React, { useState, useMemo } from "react";
+import ToDoList from "./ToDoList";
 
 function ToDoHome({ onLogout, username }) {
   // タスク一覧
@@ -12,6 +13,9 @@ function ToDoHome({ onLogout, username }) {
   // エラー & 通知
   const [error, setError] = useState("");
   const [notification, setNotification] = useState("");
+
+  // フィルタ ('all' | 'completed' | 'incomplete')
+  const [filter, setFilter] = useState("all");
 
   // 追加ボタン
   const handleAddTask = (e) => {
@@ -35,15 +39,16 @@ function ToDoHome({ onLogout, username }) {
     setError("");
 
     // 現在日時（表示用）
-    const currentDateTime = new Date().toLocaleString();
+    const now = new Date().toLocaleString();
 
     // 新しいタスク
     const newTask = {
       id: Date.now(), // 一意のID
       title: t,
       details: d,
-      createdAt: currentDateTime,
-      updatedAt: currentDateTime,
+      createdAt: now,
+      updatedAt: now,
+      completed: false, // 初期は未完了
     };
 
     // リストに追加
@@ -58,11 +63,33 @@ function ToDoHome({ onLogout, username }) {
     setTimeout(() => setNotification(""), 3000);
   };
 
+  // 完了/未完了トグル
+  const handleToggleComplete = (id) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id
+          ? {
+              ...task,
+              completed: !task.completed,
+              updatedAt: new Date().toLocaleString(),
+            }
+          : task
+      )
+    );
+  };
+
   // ログアウト
   const handleLogout = () => {
     setTasks([]); // 表示用をクリア（任意）
     onLogout(); // 親から渡されたログアウト処理を実行
   };
+
+  // フィルタ適用後の配列
+  const filteredTasks = useMemo(() => {
+    if (filter === "completed") return tasks.filter((t) => t.completed);
+    if (filter === "incomplete") return tasks.filter((t) => !t.completed);
+    return tasks;
+  }, [tasks, filter]);
 
   // --- style（簡易） ---
   const headerStyle = {
@@ -99,13 +126,22 @@ function ToDoHome({ onLogout, username }) {
 
   const submitStyle = {
     padding: "10px 20px",
-    backgroundColor: "#007bff",
+    backgroundColor: "#28a745",
     color: "#fff",
     border: "none",
     cursor: "pointer",
     borderRadius: "5px",
     marginTop: "10px",
   };
+
+  const filterBarStyle = { display: "flex", gap: "10px", marginTop: "20px" };
+  const filterBtn = (type) => ({
+    padding: "10px 20px",
+    border: "none",
+    cursor: "pointer",
+    color: "#fff",
+    backgroundColor: filter === type ? "#007bff" : "#6c757d",
+  });
 
   return (
     <div style={wrapStyle}>
@@ -118,7 +154,7 @@ function ToDoHome({ onLogout, username }) {
       </header>
 
       {/* 追加フォーム */}
-      <form onSubmit={handleAddTask} style={{ marginBottom: "20px" }}>
+      <form onSubmit={handleAddTask} style={{ marginBottom: "10px" }}>
         <input
           type="text"
           placeholder="タスクタイトル（25文字以内）"
@@ -141,33 +177,36 @@ function ToDoHome({ onLogout, username }) {
 
       {/* 通知 */}
       {notification && (
-        <p style={{ color: "green", marginBottom: "20px" }}>{notification}</p>
+        <p style={{ color: "green", marginBottom: "10px" }}>{notification}</p>
       )}
 
+      {/* フィルタリングボタン */}
+      <div style={filterBarStyle}>
+        <button
+          style={filterBtn("all")}
+          onClick={() => setFilter("all")}
+          type="button"
+        >
+          すべて
+        </button>
+        <button
+          style={filterBtn("completed")}
+          onClick={() => setFilter("completed")}
+          type="button"
+        >
+          完了
+        </button>
+        <button
+          style={filterBtn("incomplete")}
+          onClick={() => setFilter("incomplete")}
+          type="button"
+        >
+          未完了
+        </button>
+      </div>
+
       {/* タスクリスト */}
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {tasks.map((task) => (
-          <li
-            key={task.id}
-            style={{
-              borderBottom: "1px solid #ddd",
-              padding: "10px",
-              marginBottom: "10px",
-              borderRadius: "5px",
-              backgroundColor: "#f8f9fa",
-            }}
-          >
-            <h3 style={{ margin: "0 0 5px 0" }}>{task.title}</h3>
-            <p style={{ margin: "0 0 5px 0" }}>{task.details}</p>
-            <small style={{ display: "block", color: "#888" }}>
-              作成日時: {task.createdAt}
-            </small>
-            <small style={{ display: "block", color: "#888" }}>
-              更新日時: {task.updatedAt}
-            </small>
-          </li>
-        ))}
-      </ul>
+      <ToDoList tasks={filteredTasks} onToggleComplete={handleToggleComplete} />
     </div>
   );
 }
