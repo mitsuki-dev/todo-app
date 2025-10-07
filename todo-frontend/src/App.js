@@ -11,6 +11,7 @@ import Header from "./components/Header.js";
 import LoginForm from "./components/LoginForm";
 import SignUpForm from "./components/SignUpForm";
 import ToDoHome from "./components/TodoHome"; // ←ファイル名に合わせる
+import "./App.css";
 
 function App() {
   // ログイン状態と表示名

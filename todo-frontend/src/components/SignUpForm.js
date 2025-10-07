@@ -1,129 +1,124 @@
 // src/components/SignUpForm.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import apiClient from "../api/client"; // axios設定を読み込み
 
 function SignUpForm() {
-  // フォームの状態
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
   });
 
-  // バリデーションエラー
-  const [errors, setErrors] = useState({});
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // 入力変更
-  const handleInputChange = (e) => {
+  // 入力変更時の処理
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [name]: value });
+    setError(""); // 入力時にエラーをリセット
   };
 
-  // 送信
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const newErrors = {};
-    if (!formData.username)
-      newErrors.username = "ユーザー名を入力してください。";
-    if (!formData.email) newErrors.email = "メールアドレスを入力してください。";
-    if (!formData.password)
-      newErrors.password = "パスワードを入力してください。";
-
-    setErrors(newErrors);
-
-    // エラーなし → 仮登録完了 → /login へ
-    if (Object.keys(newErrors).length === 0) {
-      alert("アカウント作成が完了しました！（仮）");
+  // フォーム送信時の処理
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // ページリロード防止
+    try {
+      await apiClient.post("/auth/signup", formData); // FastAPIに送信
+      alert("アカウントが作成されました！ログイン画面に進んでください。");
       navigate("/login");
+    } catch (err) {
+      console.error("ERROR:", err.response?.data);
+      const detail = err.response?.data?.detail;
+      let message =
+        "アカウント作成に失敗しました。入力内容を確認してください。";
+
+      if (typeof detail === "string") {
+        message = detail;
+      } else if (Array.isArray(detail)) {
+        // FastAPIのバリデーションエラー配列を整形して表示
+        message = detail.map((d) => d.msg ?? JSON.stringify(d)).join("\n");
+      }
+      setError(message);
     }
   };
 
-  // スタイル（簡易）
-  const formStyle = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
-    margin: "0 auto",
-    maxWidth: "400px",
-  };
-  const inputStyle = {
-    padding: "10px",
-    fontSize: "16px",
-    width: "100%",
-    boxSizing: "border-box",
-  };
-  const errorStyle = { color: "red", fontSize: "12px" };
-  const buttonStyle = {
-    padding: "10px",
-    fontSize: "16px",
-    backgroundColor: "#007bff",
-    color: "#fff",
-    border: "none",
-    cursor: "pointer",
-  };
-  const linkButtonStyle = {
-    padding: "10px",
-    fontSize: "16px",
-    backgroundColor: "transparent",
-    color: "#007bff",
-    border: "none",
-    textDecoration: "underline",
-    cursor: "pointer",
-    textAlign: "center",
-  };
-
   return (
-    <form style={formStyle} onSubmit={handleSubmit}>
+    <form
+      onSubmit={handleSubmit}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "15px",
+        maxWidth: "400px",
+        margin: "20px auto",
+      }}
+    >
       {/* ユーザー名 */}
-      <div>
-        <input
-          type="text"
-          name="username"
-          placeholder="ユーザー名"
-          value={formData.username}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-        {errors.username && <p style={errorStyle}>{errors.username}</p>}
-      </div>
+      <input
+        type="text"
+        name="username"
+        placeholder="ユーザー名"
+        value={formData.username}
+        onChange={handleChange}
+        required
+        style={{ padding: "10px", fontSize: "16px" }}
+      />
 
-      {/* メール */}
-      <div>
-        <input
-          type="email"
-          name="email"
-          placeholder="メールアドレス"
-          value={formData.email}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-        {errors.email && <p style={errorStyle}>{errors.email}</p>}
-      </div>
+      {/* メールアドレス */}
+      <input
+        type="email"
+        name="email"
+        placeholder="メールアドレス"
+        value={formData.email}
+        onChange={handleChange}
+        required
+        style={{ padding: "10px", fontSize: "16px" }}
+      />
 
       {/* パスワード */}
-      <div>
-        <input
-          type="password"
-          name="password"
-          placeholder="パスワード"
-          value={formData.password}
-          onChange={handleInputChange}
-          style={inputStyle}
-        />
-        {errors.password && <p style={errorStyle}>{errors.password}</p>}
-      </div>
+      <input
+        type="password"
+        name="password"
+        placeholder="パスワード（6〜72文字）"
+        value={formData.password}
+        onChange={handleChange}
+        required
+        maxLength={72}
+        style={{ padding: "10px", fontSize: "16px" }}
+      />
 
-      <button type="submit" style={buttonStyle}>
+      {/* エラーメッセージ */}
+      {error && <p style={{ color: "red", whiteSpace: "pre-line" }}>{error}</p>}
+
+      {/* 送信ボタン */}
+      <button
+        type="submit"
+        style={{
+          padding: "10px",
+          fontSize: "16px",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          cursor: "pointer",
+        }}
+      >
         アカウント作成
       </button>
 
-      {/* ログインに戻るリンク風ボタン */}
+      {/* ログイン画面に戻る */}
       <button
         type="button"
-        style={linkButtonStyle}
         onClick={() => navigate("/login")}
+        style={{
+          padding: "10px",
+          fontSize: "16px",
+          backgroundColor: "transparent",
+          color: "#007bff",
+          border: "none",
+          textDecoration: "underline",
+          cursor: "pointer",
+        }}
       >
         ログイン画面に戻る
       </button>

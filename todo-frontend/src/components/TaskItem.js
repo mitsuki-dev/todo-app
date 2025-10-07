@@ -20,32 +20,8 @@ function TaskItem({ task, onDelete, onUpdate, onToggleComplete }) {
     setIsEditing(false);
   };
 
-  const liStyle = {
-    border: "1px solid #ddd",
-    borderRadius: "6px",
-    padding: "12px",
-    marginBottom: "12px",
-    background: "#fff",
-  };
-
-  const metaStyle = { color: "#666", fontSize: "12px", marginTop: "6px" };
-  const rowStyle = {
-    display: "flex",
-    gap: "8px",
-    marginTop: "10px",
-    flexWrap: "wrap",
-  };
-  const btn = {
-    padding: "8px 12px",
-    fontSize: "14px",
-    border: "none",
-    cursor: "pointer",
-    borderRadius: "4px",
-  };
-
   return (
-    <li style={liStyle}>
-      {/* 表示 or 編集フォーム */}
+    <li className="todo-item">
       {!isEditing ? (
         <>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -54,6 +30,7 @@ function TaskItem({ task, onDelete, onUpdate, onToggleComplete }) {
               checked={task.completed}
               onChange={() => onToggleComplete(task.id)}
               aria-label="完了切り替え"
+              style={{ transform: "scale(0.9)", accentColor: "#a78bfa" }}
             />
             <h3
               style={{
@@ -64,26 +41,28 @@ function TaskItem({ task, onDelete, onUpdate, onToggleComplete }) {
               {task.title}
             </h3>
           </div>
+
           <p style={{ marginTop: "6px", whiteSpace: "pre-wrap" }}>
             {task.details}
           </p>
-          <div style={metaStyle}>
+
+          <div style={{ color: "#666", fontSize: "12px", marginTop: "6px" }}>
             <div>作成日時: {task.createdAt}</div>
             <div>更新日時: {task.updatedAt}</div>
           </div>
 
-          <div style={rowStyle}>
+          <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
             <button
-              style={{ ...btn, background: "#0d6efd", color: "#fff" }}
+              className="btn btn-ghost"
               onClick={() => setIsEditing(true)}
             >
-              編集
+              ✏️ 編集
             </button>
             <button
-              style={{ ...btn, background: "#dc3545", color: "#fff" }}
+              className="btn btn-logout"
               onClick={() => onDelete(task.id)}
             >
-              削除
+              🗑 削除
             </button>
           </div>
         </>
@@ -94,25 +73,11 @@ function TaskItem({ task, onDelete, onUpdate, onToggleComplete }) {
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
             placeholder="タイトル（25文字以内）"
-            style={{
-              width: "100%",
-              padding: "8px",
-              fontSize: "14px",
-              boxSizing: "border-box",
-            }}
           />
           <textarea
             value={editDetails}
             onChange={(e) => setEditDetails(e.target.value)}
             placeholder="詳細"
-            style={{
-              width: "100%",
-              height: "100px",
-              padding: "8px",
-              fontSize: "14px",
-              boxSizing: "border-box",
-              marginTop: "8px",
-            }}
           />
           {error && (
             <p style={{ color: "red", fontSize: "13px", marginTop: "6px" }}>
@@ -120,15 +85,12 @@ function TaskItem({ task, onDelete, onUpdate, onToggleComplete }) {
             </p>
           )}
 
-          <div style={rowStyle}>
-            <button
-              style={{ ...btn, background: "#198754", color: "#fff" }}
-              onClick={handleSave}
-            >
-              保存
+          <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+            <button className="btn btn-primary" onClick={handleSave}>
+              💾 保存
             </button>
             <button
-              style={{ ...btn, background: "#6c757d", color: "#fff" }}
+              className="btn btn-ghost"
               onClick={() => {
                 setIsEditing(false);
                 setEditTitle(task.title);
@@ -136,7 +98,7 @@ function TaskItem({ task, onDelete, onUpdate, onToggleComplete }) {
                 setError("");
               }}
             >
-              キャンセル
+              ✖ キャンセル
             </button>
           </div>
         </>

@@ -1,97 +1,114 @@
-// src/components/LoginForm.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import apiClient from "../api/client";
 
 function LoginForm({ onLogin }) {
-  const [username, setUsername] = useState(""); // ユーザー名
-  const [password, setPassword] = useState(""); // パスワード
-  const [error, setError] = useState(""); // エラーメッセージ
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  // ログインフォームの送信処理
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const response = await apiClient.post("/auth/login", {
+        username: username.trim(),
+        password,
+      });
 
-    // 仮の認証データ（カリキュラム指定）
-    const mockUser = {
-      username: "testuser",
-      password: "password123",
-    };
-
-    // 入力チェック
-    if (username === mockUser.username && password === mockUser.password) {
-      setError("");
-      onLogin(username); // ← App.js にログイン成功を通知
-      navigate("/home"); // ← ホームへ遷移
-    } else {
-      setError("ユーザー名またはパスワードが正しくありません。");
+      const { token } = response.data; // { token: "..." } を想定
+      localStorage.setItem("token", token);
+      if (onLogin) onLogin(username.trim());
+      navigate("/home");
+    } catch (err) {
+      // 返却エラーを安全に文字列化
+      const detail = err?.response?.data?.detail;
+      let msg =
+        "ログインに失敗しました。ユーザー名またはパスワードを確認してください。";
+      if (typeof detail === "string") {
+        msg = detail;
+      } else if (Array.isArray(detail)) {
+        msg = detail.map((d) => d?.msg ?? JSON.stringify(d)).join("\n");
+      } else if (err?.message && !err?.response) {
+        // ネットワーク・CORS 等
+        msg = `ネットワークエラー: ${err.message}`;
+      }
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleNavigateToSignUp = () => {
-    navigate("/signup");
-  };
-
-  // ---- 簡易スタイル（そのままコピペでOK）----
-  const formStyle = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
-    maxWidth: "400px",
-    margin: "20px auto",
-  };
-  const inputStyle = {
-    padding: "10px",
-    fontSize: "16px",
-    width: "100%",
-    boxSizing: "border-box",
-  };
-  const buttonStyle = {
-    padding: "10px",
-    fontSize: "16px",
-    backgroundColor: "#007bff",
-    color: "#fff",
-    border: "none",
-    cursor: "pointer",
-    textAlign: "center",
-  };
-  const linkButtonStyle = {
-    padding: "10px",
-    fontSize: "16px",
-    backgroundColor: "transparent",
-    color: "#007bff",
-    border: "none",
-    textDecoration: "underline",
-    cursor: "pointer",
-    textAlign: "center",
-  };
-  const errorStyle = { color: "red", fontSize: "12px" };
-
   return (
-    <form style={formStyle} onSubmit={handleSubmit}>
+    <form
+      onSubmit={handleLogin}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "15px",
+        maxWidth: "400px",
+        margin: "20px auto",
+      }}
+    >
       <input
         type="text"
         placeholder="ユーザー名"
         value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        style={inputStyle}
+        onChange={(e) => {
+          setUsername(e.target.value);
+          if (error) setError("");
+        }}
+        required
+        autoComplete="username"
+        style={{ padding: "10px", fontSize: "16px" }}
       />
+
       <input
         type="password"
         placeholder="パスワード"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={inputStyle}
+        onChange={(e) => {
+          setPassword(e.target.value);
+          if (error) setError("");
+        }}
+        required
+        autoComplete="current-password"
+        style={{ padding: "10px", fontSize: "16px" }}
       />
 
-      {error && <p style={errorStyle}>{error}</p>}
+      {error && <p style={{ color: "red", whiteSpace: "pre-line" }}>{error}</p>}
 
-      <button type="submit" style={buttonStyle}>
-        ログイン
+      <button
+        type="submit"
+        disabled={loading}
+        style={{
+          padding: "10px",
+          fontSize: "16px",
+          backgroundColor: loading ? "#6c757d" : "#007bff",
+          color: "#fff",
+          border: "none",
+          cursor: loading ? "not-allowed" : "pointer",
+        }}
+      >
+        {loading ? "ログイン中..." : "ログイン"}
       </button>
+
       <button
         type="button"
-        style={linkButtonStyle}
-        onClick={handleNavigateToSignUp}
+        onClick={() => navigate("/signup")}
+        style={{
+          padding: "10px",
+          fontSize: "16px",
+          backgroundColor: "transparent",
+          color: "#007bff",
+          border: "none",
+          textDecoration: "underline",
+          cursor: "pointer",
+        }}
       >
         アカウント作成はこちら
       </button>

@@ -1,6 +1,6 @@
 // src/components/TodoHome.js
 import React, { useState } from "react";
-import TaskFilter from "./TaskFilter";
+import FilterBar from "./FilterBar";
 import TaskList from "./TaskList";
 
 // Todoアプリのメインコンポーネント
@@ -161,8 +161,7 @@ function TodoHome({ onLogout, username }) {
       </form>
 
       {/* フィルタボタン */}
-      <TaskFilter filter={filter} setFilter={setFilter} />
-
+      <FilterBar filter={filter} setFilter={setFilter} />
       {/* タスクリスト */}
       <TaskList
         tasks={filteredTasks}

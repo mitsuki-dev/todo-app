@@ -1,7 +1,7 @@
 # app/schemas.py
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, Field, EmailStr, ConfigDict
+from pydantic import BaseModel, Field, EmailStr, ConfigDict, field_validator
 
 
 # ===== User =====
@@ -11,11 +11,18 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     # 受信専用: 平文パスワード（ハッシュ化はサーバ側で）
-    password: str = Field(..., min_length=6)
+    password: str = Field(..., min_length=6, max_length=72)  # 文字数上限（目安）
+
+    # バイト数（UTF-8）で72以下を厳密チェック
+    @field_validator("password")
+    @classmethod
+    def password_max_bytes(cls, v: str) -> str:
+        if len(v.encode("utf-8")) > 72:
+            raise ValueError("Password must be 72 bytes or less (UTF-8).")
+        return v
 
 class UserRead(UserBase):
     id: int
-
     # Pydantic v2: ORMからの変換を有効にする
     model_config = ConfigDict(from_attributes=True)
 
@@ -28,6 +35,7 @@ class TodoBase(BaseModel):
     details: Optional[str] = None
     completed: bool = False
 
+    
 class TodoCreate(TodoBase):
     # 作成時は completed は基本 False のままでOK
     pass
